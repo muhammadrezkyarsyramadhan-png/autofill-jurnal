@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kejar.id Jurnal Generator</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --success: #4ade80;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+      color: var(--accent);
+    }
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 22px;
+      font-size: 0.9rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    input[type="date"] {
+      width: 100%;
+      padding: 9px 12px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .default-box {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      max-height: 220px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0f172a;
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-secondary {
+      background: #334155;
+      color: var(--text);
+    }
+    .btn-secondary:hover { background: #475569; }
+    .btn-success {
+      background: var(--success);
+      color: #0f172a;
+    }
+    textarea {
+      width: 100%;
+      height: 380px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #a5f3fc;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.8rem;
+      padding: 12px;
+      resize: vertical;
+      line-height: 1.4;
+    }
+    .note {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    .badge {
+      display: inline-block;
+      background: #334155;
+      color: var(--muted);
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-left: 6px;
+    }
+    .section-title {
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin: 10px 0 4px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kejar.id Jurnal Generator</h1>
+  <p class="subtitle">Hanya tanggal yang bisa diubah. Sisanya pakai default yang sudah ada.</p>
+
+  <!-- 1. Tanggal -->
+  <div class="card">
+    <h2>1. Rentang Tanggal</h2>
+    <div class="grid">
+      <div>
+        <label>Tanggal Mulai</label>
+        <input type="date" id="startDate" value="2026-07-31" />
+      </div>
+      <div>
+        <label>Tanggal Akhir</label>
+        <input type="date" id="endDate" value="2026-09-20" />
+      </div>
+    </div>
+    <p class="note">Default: 31 Juli 2026 – 20 September 2026</p>
+  </div>
+
+  <!-- 2. Journal Default -->
+  <div class="card">
+    <h2>2. Journal (Default)</h2>
+    <p class="note" style="margin-bottom:10px">Berikut data default yang akan dipakai. Tidak bisa diubah lewat form.</p>
+
+    <div class="section-title">Salat & Zikir</div>
+    <div class="default-box" id="salatPreview"></div>
+
+    <div class="section-title">Harian (13 habit)</div>
+    <div class="default-box" id="harianPreview"></div>
+
+    <div class="section-title">Mingguan (20 habit)</div>
+    <div class="default-box" id="mingguanPreview"></div>
+  </div>
+
+  <!-- 3. Generate -->
+  <div class="card">
+    <h2>3. Generate Script</h2>
+    <div class="actions">
+      <button class="btn-primary" onclick="generateScript()">Generate Script</button>
+      <button class="btn-secondary" onclick="copyScript()">Copy ke Clipboard</button>
+      <button class="btn-success" onclick="downloadScript()">Download .js</button>
+    </div>
+    <p class="note">Setelah generate → Copy → Paste di Console (F12) saat sudah login di app.kejar.id</p>
+  </div>
+
+  <!-- Output -->
+  <div class="card">
+    <h2>Hasil Script <span class="badge" id="statusBadge">belum digenerate</span></h2>
+    <textarea id="output" readonly placeholder="Klik Generate Script di atas..."></textarea>
+  </div>
+
+  <script>
+    // ===================== DATA DEFAULT =====================
+    const SALAT_GROUPS = [
+      [{id:"501d7a15-108a-3649-86eb-e46e2c4cc7c5", category:"Tidak Melaksanakan", point:0, do:false}],
+      [
+        {id:"2c25d0e8-8a08-3d2f-a680-7946f0d39732", category:"Melaksanakan", point:1, do:true},
+        {id:"3ac63d00-742a-3c98-8343-7db6b8fba9fe", category:"Ya", point:2, do:true}
+      ],
+      [{id:"c1d3cf3f-1ddc-3fb8-83fe-bf7c937e70e4", category:"Mendengarkan", point:1, do:true}],
+      [
+        {id:"a0ec5e28-7651-3d41-9836-22e57f886082", category:"Melaksanakan", point:1, do:true},
+        {id:"7dc4f46c-0779-3cf2-9d39-12bf900b872b", category:"Ya", point:2, do:true}
+      ],
+      [
+        {id:"a62314db-3df5-36c1-8ab8-5f49d050f0b1", category:"Melaksanakan", point:1, do:true},
+        {id:"559c3281-56cb-32b7-8d80-4308002490ac", category:"Ya", point:2, do:true}
+      ],
+      [{id:"29e8b1f5-d1d8-3b57-9b16-a4257eb461ca", category:"Mendengarkan", point:1, do:true}],
+      [
+        {id:"8ee9df38-927f-3f07-a1bc-7e60addf6287", category:"Melaksanakan", point:1, do:true},
+        {id:"61049e9f-2058-33a3-8d84-9987fce9b33f", category:"Ya", point:2, do:true}
+      ],
+      [
+        {id:"41211acd-c133-38ed-bcf8-93fa737d555e", category:"Melaksanakan", point:1, do:true},
+        {id:"8c97f126-3292-388b-aa4c-60a1c5b36802", category:"Ya", point:2, do:true}
+      ]
+    ];
+
+    const HARIAN = [
+      {key:"46d62cc9", id:"46d62cc9-b12b-4d20-9a72-43956ee350ce", category:"Melaksanakan 2 Rakaat", point:2},
+      {key:"d795c96e", id:"d795c96e-8856-4ce8-b9fa-fc63fd59942e", category:"Melaksanakan", point:1},
+      {key:"e113d723", id:"e113d723-2954-47a2-9b76-fcddcb32bf7f", category:"Sebelum pukul 22.00", point:1},
+      {key:"a82dc384", id:"a82dc384-5438-4c6e-990e-eed2e8648514", category:"Sebelum pukul 05.00", point:1},
+      {key:"20fa6aa2", id:"20fa6aa2-3a61-40a5-8973-1a4b74ef5bac", category:"Melaksanakan", point:1},
+      {key:"d39c21c0", id:"d39c21c0-cd23-4211-b5be-ee027b4b377d", category:"Melaksanakan", point:1},
+      {key:"d1c11c40", id:"d1c11c40-9e79-44cc-95c0-1bef9e93c627", category:"Melaksanakan", point:1},
+      {key:"285f4601", id:"285f4601-afd6-4220-a2e0-d5a814c6ca7c", category:"Melaksanakan", point:1},
+      {key:"c9a2b635", id:"c9a2b635-2bf8-4d68-b1e9-5404422d990a", category:"Melaksanakan", point:1},
+      {key:"2a21a879", id:"2a21a879-dcff-4f98-82f5-79994e775d80", category:"Melaksanakan", point:1},
+      {key:"ade82b48", id:"ade82b48-692b-40f2-84a1-f7259d3a0184", category:"Melaksanakan", point:1, deed_id:"81801700-49f6-49e8-9ea1-9c5fd9b2c4d3"},
+      {key:"5f25aaba", id:"5f25aaba-42fa-43e2-893c-dab1d6faab1c", category:"Melaksanakan", point:1},
+      {key:"140748ad", id:"140748ad-e2ea-48a6-8348-6aadaa62af31", category:"Melaksanakan", point:1}
+    ];
+
+    const MINGGUAN = [
+      {habit_id:"e4c7dfac-2fc8-4e25-af5a-6834df7b69f5", category:"melaksanakan", point:1, dayOffset:4, witnessType:"FRIEND", witnessName:"Dear"},
+      {habit_id:"de9d7085-d555-46b3-b677-589fb71ea085", category:"tidak melaksanakan", point:0, dayOffset:0},
+      {habit_id:"7f151dfc-6f86-451b-89a4-24932d68683a", category:"tidak melaksanakan", point:0, dayOffset:0},
+      {habit_id:"33396f2a-97f1-4f13-8b1e-27b8cd66ab6c", category:"melaksanakan", point:1, dayOffset:5, witnessType:"PARENT", witnessName:""},
+      {habit_id:"e66a5f41-9619-481d-a023-38a4a2ef46a8", category:"melaksanakan", point:1, dayOffset:4, witnessType:"PARENT", witnessName:""},
+      {habit_id:"d65e1c23-0548-404d-902d-980eba88c027", category:"melaksanakan", point:1, dayOffset:5, witnessType:"PARENT", witnessName:""},
+      {habit_id:"ae245657-fd91-470b-ac0c-d25f62ffe550", category:"hadir tepat waktu", point:3, dayOffset:0, witnessType:"FRIEND", witnessName:"dear"},
+      {habit_id:"aef9f818-ff68-4d91-b192-9ddf2eb13038", category:"hadir tepat waktu", point:20, dayOffset:2, witnessType:"PARENT", witnessName:""},
+      {habit_id:"5a13bfad-8e8b-4090-9719-d3b10f972008", category:"tidak melaksanakan", point:0, dayOffset:0},
+      {habit_id:"d3f76749-ccec-4152-b55e-6536852cd60b", category:"tidak melaksanakan", point:0, dayOffset:0},
+      {habit_id:"642f84c9-81ae-4444-ac4c-e98d05f60d57", category:"tidak melaksanakan", point:0, dayOffset:0},
+      {habit_id:"861303b1-f7e8-4ee5-b288-d68bfb75edc6", category:"tidak melaksanakan", point:0, dayOffset:0},
+      {habit_id:"90c20cba-34bc-47f8-9978-0debd400fdaa", category:"tidak melaksanakan", point:0, dayOffset:0},
+      {habit_id:"5b96d786-21c4-4ad9-b97b-402cb768374a", category:"melaksanakan", point:1, dayOffset:5, witnessType:"PARENT", witnessName:""},
+      {habit_id:"56da8df9-b4c7-4564-aa77-b4a5c9c01bb1", category:"melaksanakan", point:1, dayOffset:6, witnessType:"PARENT", witnessName:""},
+      {habit_id:"935e284e-e287-4961-8bb1-e498dfb4f14d", category:"tidak melaksanakan", point:0, dayOffset:0},
+      {habit_id:"68703138-063c-4786-8652-89d12e66d999", category:"hadir tepat waktu", point:2, dayOffset:4, witnessType:"FRIEND", witnessName:"lutfi"},
+      {habit_id:"79f05520-b2e4-4302-919b-e71272870370", category:"tidak melaksanakan", point:0, dayOffset:0},
+      {habit_id:"711dcd99-be3f-4e74-a87c-8481058cab49", category:"melaksanakan", point:1, dayOffset:4, witnessType:"FRIEND", witnessName:"lutfi"},
+      {
+        habit_id: "399469c2-610f-446e-8232-c1fd9fb407e7",
+        category: "melaksanakan 2 hari (senin kamis)",
+        point: 2,
+        dayOffset: 3,
+        witnessType: "FRIEND",
+        witnessName: "dear",
+        deed_id: "d58de1aa-7165-4dd1-a3bb-6ed48165ca15"
+      }
+    ];
+
+    // ===================== PREVIEW =====================
+    function renderPreviews() {
+      document.getElementById('salatPreview').textContent = SALAT_GROUPS.map((g,i) => 
+        `Group ${i+1}: ` + g.map(x => `${x.category} (${x.point})`).join(' + ')
+      ).join('\n');
+
+      document.getElementById('harianPreview').textContent = HARIAN.map(h => 
+        `${h.key} → ${h.category} (point ${h.point})`
+      ).join('\n');
+
+      document.getElementById('mingguanPreview').textContent = MINGGUAN.map(h => 
+        `${h.habit_id.slice(0,8)}… → ${h.category} (point ${h.point})` + (h.witnessType ? ` [${h.witnessType}: ${h.witnessName||'-'}]` : '')
+      ).join('\n');
+    }
+    renderPreviews();
+
+    // ===================== HELPERS =====================
+    function generateDateRange(start, end) {
+      const dates = [];
+      let cur = new Date(start);
+      const last = new Date(end);
+      while (cur <= last) {
+        dates.push(cur.toISOString().slice(0,10));
+        cur.setDate(cur.getDate() + 1);
+      }
+      return dates;
+    }
+
+    function getWeeks(startStr, endStr) {
+      let d = new Date(startStr);
+      const day = d.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      d.setDate(d.getDate() + diff);
+
+      const weeks = [];
+      const end = new Date(endStr);
+      while (d <= end) {
+        const start = new Date(d);
+        const endW = new Date(d);
+        endW.setDate(endW.getDate() + 6);
+        weeks.push({
+          start: start.toISOString().slice(0,10),
+          end: endW.toISOString().slice(0,10)
+        });
+        d.setDate(d.getDate() + 7);
+      }
+      return weeks;
+    }
+
+    // ===================== GENERATE =====================
+    function generateScript() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      const DATES = generateDateRange(startDate, endDate);
+      const WEEKS = getWeeks(startDate, endDate);
+
+      let code = `// === GENERATED BY Kejar Jurnal Generator ===
+// Rentang: ${startDate} s/d ${endDate}
+// Generated: ${new Date().toLocaleString('id-ID')}
+
+// ======================================================
+// 1. JURNAL SALAT & ZIKIR
+// ======================================================
+(async () => {
+  const EP = "https://app.kejar.id/student/journal_salat_zikir/bulk-create";
+  const GROUPS = ${JSON.stringify(SALAT_GROUPS)};
+  const DATES = ${JSON.stringify(DATES)};
+  let ok=0, err=0;
+  for (const date of DATES) {
+    for (const group of GROUPS) {
+      const params = new URLSearchParams();
+      params.append("payloadHabit[date]", date);
+      group.forEach((item, i) => {
+        params.append(\`payloadHabit[categories][\${i}][category]\`, item.category);
+        params.append(\`payloadHabit[categories][\${i}][point]\`, item.point);
+        params.append(\`payloadHabit[categories][\${i}][do]\`, item.do);
+        params.append(\`payloadHabit[categories][\${i}][deedable_id]\`, item.id);
+      });
+      try {
+        const xsrf = decodeURIComponent((document.cookie.match(/XSRF-TOKEN=([^;]+)/)||[])[1]||'');
+        const res = await fetch(EP, {
+          method:"POST",
+          headers:{"Content-Type":"application/x-www-form-urlencoded","X-XSRF-TOKEN":xsrf},
+          credentials:"include",
+          body:params.toString()
+        });
+        const json = await res.json();
+        if(res.ok){ok++;console.log("✅ Salat ["+date+"]",json);}
+        else{err++;console.warn("⚠️ Salat ["+date+"] "+res.status,json);}
+      } catch(e){err++;console.error("❌ Salat ["+date+"]",e);}
+      await new Promise(r=>setTimeout(r,500));
+    }
+  }
+  console.log("Salat & Zikir selesai — OK:"+ok+" ERR:"+err);
+})();
+
+// ======================================================
+// 2. JURNAL HARIAN
+// ======================================================
+(async () => {
+  const EP = "https://app.kejar.id/student/journal-daily/bulk-deed-habbit";
+  const HARIAN = ${JSON.stringify(HARIAN)};
+  const DATES = ${JSON.stringify(DATES)};
+  let ok=0, err=0;
+  for (const date of DATES) {
+    for (const h of HARIAN) {
+      const params = new URLSearchParams();
+      params.append("payloadHabit[date]", date);
+      params.append("payloadHabit[type]", "HABIT");
+      params.append("payloadHabit[categories][0][category]", h.category);
+      params.append("payloadHabit[categories][0][point]", h.point);
+      params.append("payloadHabit[categories][0][do]", true);
+      params.append("payloadHabit[categories][0][deedable_id]", h.id);
+      if (h.deed_id) params.append("payloadHabit[categories][0][deed_id]", h.deed_id);
+      try {
+        const xsrf = decodeURIComponent((document.cookie.match(/XSRF-TOKEN=([^;]+)/)||[])[1]||'');
+        const res = await fetch(EP, {
+          method:"POST",
+          headers:{"Content-Type":"application/x-www-form-urlencoded","X-XSRF-TOKEN":xsrf},
+          credentials:"include",
+          body:params.toString()
+        });
+        const json = await res.json();
+        if(res.ok){ok++;console.log("✅ Harian ["+date+"]["+h.key+"]",json);}
+        else{err++;console.warn("⚠️ Harian ["+date+"]["+h.key+"] "+res.status,json);}
+      } catch(e){err++;console.error("❌ Harian ["+date+"]["+h.key+"]",e);}
+      await new Promise(r=>setTimeout(r,400));
+    }
+  }
+  console.log("Harian selesai — OK:"+ok+" ERR:"+err);
+})();
+
+// ======================================================
+// 3. JURNAL MINGGUAN
+// ======================================================
+(async () => {
+  const EP = "https://app.kejar.id/student/journal-weekly/deed-habbit";
+  const WEEKS = ${JSON.stringify(WEEKS)};
+  const TEMPLATES = ${JSON.stringify(MINGGUAN)};
+
+  function addDays(dateStr, days) {
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0,10);
+  }
+
+  let ok=0, err=0;
+  for (const week of WEEKS) {
+    console.log("\\n=== Minggu "+week.start+" s/d "+week.end+" ===");
+    for (const t of TEMPLATES) {
+      const date = addDays(week.start, t.dayOffset);
+      if (date < week.start || date > week.end) continue;
+
+      const params = new URLSearchParams();
+      params.append("payloadDeed[habit_id]", t.habit_id);
+      params.append("payloadDeed[category]", t.category);
+      params.append("payloadDeed[point]", t.point);
+      params.append("payloadDeed[date]", date);
+      params.append("payloadDeed[deedable_type]", "HABIT");
+      params.append("payloadDeed[subtype]", "HABIT");
+      if (t.witnessType) {
+        params.append("payloadDeed[witnessType]", t.witnessType);
+        params.append("payloadDeed[witnessName]", t.witnessName || "");
+      }
+      if (t.deed_id) params.append("payloadDeed[deed_id]", t.deed_id);
+
+      try {
+        const xsrf = decodeURIComponent((document.cookie.match(/XSRF-TOKEN=([^;]+)/)||[])[1]||'');
+        const res = await fetch(EP, {
+          method:"POST",
+          headers:{"Content-Type":"application/x-www-form-urlencoded","X-XSRF-TOKEN":xsrf},
+          credentials:"include",
+          body:params.toString()
+        });
+        const json = await res.json();
+        if(res.ok){ok++;console.log("✅ Weekly "+date+" | "+t.habit_id.slice(0,8),json);}
+        else{err++;console.warn("⚠️ Weekly "+date+" | "+t.habit_id.slice(0,8)+" → "+res.status,json);}
+      } catch(e){err++;console.error("❌ Weekly "+date,e);}
+      await new Promise(r=>setTimeout(r,500));
+    }
+  }
+  console.log("\\nMingguan selesai — OK:"+ok+" ERR:"+err);
+})();
+`;
+
+      document.getElementById('output').value = code;
+      document.getElementById('statusBadge').textContent = 'siap dicopy';
+      document.getElementById('statusBadge').style.background = '#166534';
+      document.getElementById('statusBadge').style.color = '#bbf7d0';
+    }
+
+    function copyScript() {
+      const ta = document.getElementById('output');
+      if (!ta.value) {
+        alert('Generate dulu script-nya!');
+        return;
+      }
+      ta.select();
+      navigator.clipboard.writeText(ta.value).then(() => {
+        alert('Script berhasil dicopy!');
+      }).catch(() => {
+        document.execCommand('copy');
+        alert('Script dicopy');
+      });
+    }
+
+    function downloadScript() {
+      const ta = document.getElementById('output');
+      if (!ta.value) {
+        alert('Generate dulu script-nya!');
+        return;
+      }
+      const blob = new Blob([ta.value], {type: 'text/javascript'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'kejar-jurnal-script.js';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
